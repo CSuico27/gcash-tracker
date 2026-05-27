@@ -102,7 +102,7 @@ export default function LineChartOne() {
 
   const series = [
     {
-      name: "Sales",
+      name: "Earnings",
       data: [180, 190, 170, 160, 175, 165, 170, 205, 230, 210, 240, 235],
     },
     {

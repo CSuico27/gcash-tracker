@@ -83,7 +83,7 @@ export default function BarChartOne() {
   };
   const series = [
     {
-      name: "Sales",
+      name: "Earnings",
       data: [168, 385, 201, 298, 187, 195, 291, 110, 215, 390, 280, 112],
     },
   ];

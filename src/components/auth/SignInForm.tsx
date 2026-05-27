@@ -5,16 +5,16 @@ import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import Checkbox from "../form/input/Checkbox";
 import Button from "../ui/button/Button";
-import { supabase } from "../../supabase/SupabaseClient"; // ← add this
+import { supabase } from "../../supabase/SupabaseClient";
 
 export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
-  const [email, setEmail] = useState("");         // ← add
-  const [password, setPassword] = useState("");   // ← add
-  const [error, setError] = useState("");         // ← add
-  const [loading, setLoading] = useState(false);  // ← add
-  const navigate = useNavigate();                 // ← add
+  const [email, setEmail] = useState("");         
+  const [password, setPassword] = useState("");  
+  const [error, setError] = useState("");        
+  const [loading, setLoading] = useState(false);  
+  const navigate = useNavigate();                
 
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -26,7 +26,7 @@ export default function SignInForm() {
     if (error) {
       setError(error.message);
     } else {
-      navigate("/dashboard"); // ← redirect after login
+      navigate("/");
     }
 
     setLoading(false);
@@ -54,7 +54,7 @@ export default function SignInForm() {
             </p>
           </div>
           <div>
-            <form onSubmit={handleSignIn}>  {/* ← onSubmit here */}
+            <form onSubmit={handleSignIn}>
               <div className="space-y-6">
                 <div>
                   <Label>
@@ -63,7 +63,7 @@ export default function SignInForm() {
                   <Input
                     placeholder="info@gmail.com"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}  // ← add
+                    onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
                 <div>
@@ -75,7 +75,7 @@ export default function SignInForm() {
                       type={showPassword ? "text" : "password"}
                       placeholder="Enter your password"
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}  // ← add
+                      onChange={(e) => setPassword(e.target.value)} 
                     />
                     <span
                       onClick={() => setShowPassword(!showPassword)}
@@ -90,7 +90,6 @@ export default function SignInForm() {
                   </div>
                 </div>
 
-                {/* ← Show error message */}
                 {error && (
                   <p className="text-sm text-red-500">{error}</p>
                 )}
@@ -111,7 +110,7 @@ export default function SignInForm() {
                 </div>
                 <div>
                   <Button className="w-full" size="sm" disabled={loading}>
-                    {loading ? "Signing in..." : "Sign in"}  {/* ← loading state */}
+                    {loading ? "Signing in..." : "Sign in"} 
                   </Button>
                 </div>
               </div>
