@@ -14,19 +14,48 @@ export default function SignUpForm() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    password: "",
+    terms: "",
+  });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!isChecked) {
-      setError("You must agree to the Terms and Conditions.");
-      return;
-    }
-    setLoading(true);
-    setError("");
 
+  // Reset errors
+  setErrors({ firstName: "", lastName: "", email: "", phone: "", password: "", terms: "" });
+
+  if (!isChecked) {
+    setErrors(prev => ({ ...prev, terms: "You must agree to the Terms and Conditions." }));
+    return;
+  }
+
+  setLoading(true);
+
+  // Probe if email is already taken
+  const { error: signInError } = await supabase.auth.signInWithPassword({
+    email,
+    password: "probe-password-that-wont-match",
+  });
+
+  const emailTaken =
+    !signInError ||
+    signInError.message === "Invalid login credentials" ||
+    signInError.message.toLowerCase().includes("email not confirmed");
+
+  if (emailTaken) {
+    setErrors(prev => ({ ...prev, email: "This email already exists." }));  // 👈 goes under email
+    setLoading(false);
+    return;
+  }
+
+    // Proceed with actual sign up
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -40,9 +69,9 @@ export default function SignUpForm() {
     });
 
     if (error) {
-      setError(error.message);
+      setErrors(prev => ({ ...prev, password: error.message }));
     } else {
-      const { error: profileError } = await supabase.from('profiles').insert([{
+      await supabase.from("profiles").insert([{
         id: data.user?.id,
         first_name: firstName,
         last_name: lastName,
@@ -59,7 +88,7 @@ export default function SignUpForm() {
 
   return (
     <div className="flex flex-col flex-1 w-full overflow-y-auto lg:w-1/2 no-scrollbar">
-      <div className="w-full max-w-md mx-auto mb-5 sm:pt-10">
+      {/* <div className="w-full max-w-md mx-auto mb-5 sm:pt-10">
         <Link
           to="/"
           className="inline-flex items-center text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
@@ -67,7 +96,7 @@ export default function SignUpForm() {
           <ChevronLeftIcon className="size-5" />
           Back to dashboard
         </Link>
-      </div>
+      </div> */}
       <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
         <div>
           <div className="mb-5 sm:mb-8">
@@ -80,7 +109,7 @@ export default function SignUpForm() {
           </div>
           <div>
             <form onSubmit={handleSignUp}>
-              <div className="space-y-5">
+              <div className="space-y-1">
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                   <div className="sm:col-span-1">
                     <Label>
@@ -91,6 +120,7 @@ export default function SignUpForm() {
                       placeholder="Enter your first name"
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
+                      required
                     />
                   </div>
                   <div className="sm:col-span-1">
@@ -102,8 +132,10 @@ export default function SignUpForm() {
                       placeholder="Enter your last name"
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
+                      required
                     />
                   </div>
+
                 </div>
 
                 <div>
@@ -115,24 +147,35 @@ export default function SignUpForm() {
                     placeholder="Enter your email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    required
                   />
+                  {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
                 </div>
 
                 <div>
                   <Label>
                     Phone<span className="text-error-500">*</span>
                   </Label>
-                  <div className="flex">
-                    <span className="inline-flex items-center px-3 text-sm text-gray-500 bg-gray-100 border border-r-0 border-gray-300 rounded-l-lg dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700">
+                  <div className="flex w-full">
+                    <span className="inline-flex items-center px-3 text-sm text-gray-500 bg-gray-100 border border-r-0 border-gray-300 rounded-l-lg dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700 whitespace-nowrap">
                       +63
                     </span>
-                    <Input
-                      type="tel"
-                      placeholder="9XXXXXXXXX"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      className="rounded-l-none"
-                    />
+                    <div className="flex-1 min-w-0">
+                      <Input
+                        type="tel"
+                        placeholder="9XXXXXXXXX"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        className="rounded-l-none w-full"
+                        maxLength={10}
+                        required
+                        onKeyDown={(e) => {
+                          if (!/^\d$/.test(e.key) && e.key !== "Backspace") {
+                            e.preventDefault();
+                          }
+                        }}
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -160,10 +203,6 @@ export default function SignUpForm() {
                   </div>
                 </div>
 
-                {error && (
-                  <p className="text-sm text-red-500">{error}</p>
-                )}
-
                 <div className="flex items-center gap-3">
                   <Checkbox
                     className="w-5 h-5"
@@ -181,7 +220,7 @@ export default function SignUpForm() {
                     </span>
                   </p>
                 </div>
-
+                {errors.terms && <p className="mt-1 text-sm text-red-500">{errors.terms}</p>} 
                 <div>
                   <button
                     type="submit"

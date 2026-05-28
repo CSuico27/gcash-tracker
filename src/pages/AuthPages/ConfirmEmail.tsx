@@ -16,9 +16,11 @@ export default function ConfirmEmail() {
           console.error("Confirmation error:", error.message);
           navigate("/signin");
         } else {
-          navigate("/home"); // diretso dashboard
+          navigate("/home");
         }
       });
+    } else {
+      navigate("/signin");
     }
   }, []);
 
