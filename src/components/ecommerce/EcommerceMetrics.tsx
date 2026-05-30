@@ -1,7 +1,6 @@
 import {
   ArrowDownIcon,
   ArrowUpIcon,
-  BoxIconLine,
   GroupIcon,
   BoltIcon
 } from "../../icons";
@@ -136,10 +135,22 @@ const monthChange = calcChange(monthCount, lastMonthCount);
             </p>
           </div>
 
-          <Badge color={todayChange >= 0 ? "success" : "error"}>
-            {todayChange >= 0 ? <ArrowUpIcon /> : <ArrowDownIcon />}
-            {Math.abs(todayChange).toFixed(2)}%
-          </Badge>
+          <div className="flex flex-col items-end gap-2">
+            <div className="flex flex-col items-end gap-1">
+              <span className="text-xs text-gray-400 dark:text-gray-500">vs yesterday</span>
+              <Badge color={todayChange >= 0 ? "success" : "error"}>
+                {todayChange >= 0 ? <ArrowUpIcon /> : <ArrowDownIcon />}
+                {Math.abs(todayChange).toFixed(2)}%
+              </Badge>
+            </div>
+            <div className="flex flex-col items-end gap-1">
+              <span className="text-xs text-gray-400 dark:text-gray-500">vs last month</span>
+              <Badge color={monthChange >= 0 ? "success" : "error"}>
+                {monthChange >= 0 ? <ArrowUpIcon /> : <ArrowDownIcon />}
+                {Math.abs(monthChange).toFixed(2)}%
+              </Badge>
+            </div>
+          </div>
         </div>
       </div>
       {/* <!-- Metric Item End --> */}
