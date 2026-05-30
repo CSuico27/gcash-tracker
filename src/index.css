@@ -1,5 +1,6 @@
-@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap")
-layer(base);
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
 
 @import "tailwindcss";
 
@@ -8,6 +9,7 @@ layer(base);
 @theme {
   --font-*: initial;
   --font-outfit: Outfit, sans-serif;
+  --font-poppins: Poppins, sans-serif;
 
   --breakpoint-*: initial;
   --breakpoint-2xsm: 375px;
@@ -186,7 +188,7 @@ layer(base);
     cursor: pointer;
   }
   body {
-    @apply relative font-normal font-outfit z-1 bg-gray-50;
+    @apply relative font-normal font-poppins z-1 bg-gray-50;
   }
 }
 
@@ -789,4 +791,39 @@ span.flatpickr-weekday,
 
 .simplebar-scrollbar.simplebar-visible:before {
   @apply opacity-100;
+}
+
+.rdp-root {
+  --rdp-accent-color: oklch(0.623 0.214 259.815) ; /* Change the accent color to indigo. */
+  --rdp-accent-background-color: #2d2323; /* Change the accent background color. */
+  /* Add more CSS variables here. */
+  --rdp-day_button-height: 15px;
+  --rdp-day_button-width: 40px;
+  --rdp-day_button-height: 20px;
+  --rdp-day_button-width: 30px;
+}
+
+/* .rdp-day_button{
+  @apply 
+} */
+
+.rdp-week td{
+  @apply hover:bg-gray-400 hover:text-white 
+}
+
+.rdp-dropdown select:focus {
+  outline: none;
+}
+
+.rdp-month_caption{
+  @apply text-gray-700
+}
+
+.rdp-month_caption{
+  @apply text-sm
+}
+
+.rdp-chevron{
+  width: 15px;
+  height: 15px;
 }

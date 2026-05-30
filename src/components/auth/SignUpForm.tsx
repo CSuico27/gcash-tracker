@@ -50,7 +50,7 @@ export default function SignUpForm() {
     signInError.message.toLowerCase().includes("email not confirmed");
 
   if (emailTaken) {
-    setErrors(prev => ({ ...prev, email: "This email already exists." }));  // 👈 goes under email
+    setErrors(prev => ({ ...prev, email: "This email already exists." }));
     setLoading(false);
     return;
   }

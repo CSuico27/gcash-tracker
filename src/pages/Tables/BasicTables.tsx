@@ -2,20 +2,48 @@ import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import ComponentCard from "../../components/common/ComponentCard";
 import PageMeta from "../../components/common/PageMeta";
 import BasicTableOne from "../../components/tables/BasicTables/BasicTableOne";
+import AddTransactionModal from "../../components/tables/AddTransactionModal";
+import { useState, useEffect } from "react";
 
 export default function BasicTables() {
+  const [showModal, setShowModal] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0); 
+
+  useEffect(() => {
+    document.title = "GCash Transactions";
+  }, []);
+
   return (
     <>
       <PageMeta
-        title="React.js Basic Tables Dashboard | TailAdmin - Next.js Admin Dashboard Template"
-        description="This is React.js Basic Tables Dashboard page for TailAdmin - React.js Tailwind CSS Admin Dashboard Template"
+        title="GCash Transactions"
+        description=""
       />
-      <PageBreadcrumb pageTitle="Basic Tables" />
+      <PageBreadcrumb pageTitle="GCash Transactions" />
       <div className="space-y-6">
-        <ComponentCard title="Basic Table 1">
-          <BasicTableOne />
+        <ComponentCard
+          title="Transactions"
+          action={
+            <button
+              onClick={() => setShowModal(true)}
+              className="px-4 py-2 text-sm font-medium text-white rounded-lg bg-brand-500 hover:bg-brand-600"
+            >
+              + Add Transaction
+            </button>
+          }
+        >
+          <BasicTableOne refreshKey={refreshKey} />
         </ComponentCard>
       </div>
+      {showModal && (
+        <AddTransactionModal
+          onClose={() => setShowModal(false)}
+          onSuccess={() => {
+            setShowModal(false);
+            setRefreshKey((prev) => prev + 1);
+          }}
+        />
+      )}
     </>
   );
 }

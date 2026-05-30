@@ -19,6 +19,7 @@ import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 import Home from "./pages/Dashboard/Home";
 import ConfirmEmail from "./pages/AuthPages/ConfirmEmail";
+import "@daypicker/react/style.css";
 
 const ProtectedRoute = () => {
   const { session, loading } = useAuth();
