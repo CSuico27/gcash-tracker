@@ -11,6 +11,8 @@ import { supabase } from "../../../supabase/SupabaseClient";
 import TransactionActions from "../TransactionActions";
 import Spinner from "../../ui/spinner/Spinner";
 
+import ReactPaginate from 'react-paginate';
+
 interface Transaction {
   id: string;
   reference_no: string;
@@ -31,30 +33,51 @@ interface Props {
   refreshKey: number;
 }
 
+const PAGE_SIZE = 10;
+
 export default function BasicTableOne({ refreshKey }: Props) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
 
+  const fetchTransactions = async (page: number) => {
+    setLoading(true);
+    const from = page * PAGE_SIZE;
+    const to = from + PAGE_SIZE - 1;
+
+    const { data, error, count } = await supabase
+      .from("transactions")
+      .select("*", { count: "exact" })
+      .order("created_at", { ascending: false })
+      .range(from, to);
+
+    if (!error) {
+      setTransactions(data || []);
+      setTotalCount(count ?? 0);
+    }
+    setLoading(false);
+  };
+
+  // Reset to page 0 when refreshKey changes
   useEffect(() => {
-    const fetchTransactions = async () => {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from("transactions")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (!error) setTransactions(data || []);
-      setLoading(false);
-    };
-
-    fetchTransactions();
+    setCurrentPage(0);
   }, [refreshKey]);
 
-  const formatDate = (iso: string) =>
-    new Date(iso).toLocaleString("en-PH", { timeZone: "Asia/Manila" });
+  // Fetch whenever page or refreshKey changes
+  useEffect(() => {
+    fetchTransactions(currentPage);
+  }, [currentPage, refreshKey]);
 
-  const formatAmount = (amount: number) =>
-    `₱${amount.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`;
+  const handlePageChange = ({ selected }: { selected: number }) => {
+    setCurrentPage(selected);
+  };
+
+  const formatDate = (iso: string) =>
+  new Date(iso).toLocaleString("en-PH", { timeZone: "Asia/Manila" });
+
+  const formatAmount = (amount: number | null | string) =>
+    `₱${typeof amount === "number" ? amount.toLocaleString("en-PH", { minimumFractionDigits: 2 }) : amount || "0.00"}`;
 
   const getBadgeColor = (status: string) => {
     switch (status) {
@@ -156,6 +179,33 @@ export default function BasicTableOne({ refreshKey }: Props) {
           </TableBody>
         </Table>
       </div>
+      {/* Pagination Footer */}
+      {!loading && totalCount > PAGE_SIZE && (
+        <div className="flex flex-col items-center gap-2 px-5 py-4 border-t border-gray-100 dark:border-white/[0.05] sm:flex-row sm:justify-between">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Showing {currentPage * PAGE_SIZE + 1}–{Math.min((currentPage + 1) * PAGE_SIZE, totalCount)} of {totalCount} transactions
+          </p>
+          <ReactPaginate
+            pageCount={Math.ceil(totalCount / PAGE_SIZE)}
+            pageRangeDisplayed={3}
+            marginPagesDisplayed={1}
+            onPageChange={handlePageChange}
+            forcePage={currentPage}
+            containerClassName="flex items-center gap-1"
+            pageClassName="rounded-lg"
+            pageLinkClassName="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/[0.05] rounded-lg block"
+            activeClassName="bg-brand-500 rounded-lg"
+            activeLinkClassName="!text-white"
+            previousLabel="< Prev"
+            nextLabel="Next >"
+            previousLinkClassName="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/[0.05] rounded-lg block"
+            nextLinkClassName="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/[0.05] rounded-lg block"
+            breakLabel="..."
+            breakLinkClassName="px-3 py-1.5 text-sm text-gray-400 dark:text-gray-500 block"
+            disabledClassName="opacity-40 pointer-events-none"
+          />
+        </div>
+      )}
     </div>
   );
 }

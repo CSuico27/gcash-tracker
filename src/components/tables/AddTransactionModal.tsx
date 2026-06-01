@@ -148,9 +148,22 @@ export default function AddTransactionModal({
   }, []);
 
   const handleSubmit = async () => {
-    if (!form.proof_image) {
-      toast.error("Please upload a proof image.");
-      return;
+     const Fields: { key: keyof typeof form; label: string }[] = [
+      { key: "reference_no", label: "Reference No." },
+      { key: "gcash_name", label: "GCash Name" },
+      { key: "mobile_number", label: "Mobile Number" },
+      { key: "transaction_type", label: "Transaction Type" },
+      { key: "status", label: "Status" },
+      { key: "created_at", label: "Transaction Date" },
+      { key: "amount", label: "Amount" },
+      { key: "transaction_fee", label: "Transaction Fee" },
+    ];
+
+    for (const field of Fields) {
+      if (!form[field.key]) {
+        toast.error(`${field.label} is required.`);
+        return;
+      }
     }
 
     setLoading(true);
@@ -197,9 +210,9 @@ export default function AddTransactionModal({
 
     if (error) {
       if (error.code === "23505" && error.message.includes("reference_no")) {
-        setError("This reference number already exists. Please check and try again.");
+        toast.error("The reference number already exists. Please check and try again.");
       } else {
-        setError("Something went wrong. Please try again.");
+        toast.error("Something went wrong. Please try again.");
       }
     }else {
       toast.success(mode === "edit" ? "Transaction updated!" : "Transaction added!");
@@ -214,7 +227,7 @@ export default function AddTransactionModal({
     "w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-300 disabled:opacity-60 disabled:cursor-not-allowed";
 
   return (
-    <div className="fixed inset-0 z-[100000] flex items-center justify-center bg-black/50">
+    <div className="fixed inset-0 z-99 flex items-center justify-center bg-black/50">
       {/* Stop backdrop clicks from reaching the dropzone */}
       <div
         className="w-full max-w-2xl rounded-2xl bg-white dark:bg-gray-900 flex flex-col max-h-[90vh] my-6"
@@ -256,7 +269,6 @@ export default function AddTransactionModal({
                   onChange={handleChange}
                   disabled={readonly}
                   className={inputClass}
-                  required
                 />
               </div>
               <div>
@@ -271,7 +283,6 @@ export default function AddTransactionModal({
                   onChange={handleChange}
                   disabled={readonly}
                   className={inputClass}
-                  required
                 />
               </div>
               <div>
@@ -285,8 +296,7 @@ export default function AddTransactionModal({
                   value={form.mobile_number}
                   onChange={handleChange}
                   disabled={readonly}
-                  className={inputClass}
-                  required
+                  className={inputClass}   
                 />
               </div>
             </div>
@@ -303,7 +313,6 @@ export default function AddTransactionModal({
                   onChange={handleChange}
                   disabled={readonly}
                   className={inputClass}
-                  required
                 >
                   <option value="cash_in">Cash In</option>
                   <option value="cash_out">Cash Out</option>
@@ -318,8 +327,7 @@ export default function AddTransactionModal({
                   value={form.status}
                   onChange={handleChange}
                   disabled={readonly}
-                  className={inputClass}
-                  required
+                  className={inputClass}    
                 >
                   <option value="pending">Pending</option>
                   <option value="claimed">Claimed</option>
@@ -329,7 +337,6 @@ export default function AddTransactionModal({
               <div>
                 <DatePicker
                   label="Transaction Date"
-                  required
                   disabled={readonly}
                   value={form.created_at}
                   onChange={(val) =>
@@ -353,8 +360,7 @@ export default function AddTransactionModal({
                   value={form.amount}
                   onChange={handleChange}
                   disabled={readonly}
-                  className={inputClass}
-                  required
+                  className={inputClass} 
                 />
               </div>
               <div>
@@ -369,12 +375,11 @@ export default function AddTransactionModal({
                   onChange={handleChange}
                   disabled={readonly}
                   className={inputClass}
-                  required
                 />
               </div>
               <div>
                 <label className="block mb-1 text-sm text-gray-700 dark:text-gray-400">
-                  Claimed By <span className="text-error-500">*</span>
+                  Claimed By
                 </label>
                 <input
                   name="claimed_by"
@@ -384,7 +389,6 @@ export default function AddTransactionModal({
                   onChange={handleChange}
                   disabled={readonly}
                   className={inputClass}
-                  required
                 />
               </div>
             </div>
@@ -393,7 +397,7 @@ export default function AddTransactionModal({
             {!readonly && (
               <div>
                 <label className="block mb-1 text-sm text-gray-700 dark:text-gray-400">
-                  Proof Image <span className="text-error-500">*</span>
+                  Proof Image
                 </label>
                 <Dropzone onFileAccepted={handleFileAccepted} />
                 {uploading && (

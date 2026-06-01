@@ -827,3 +827,8 @@ span.flatpickr-weekday,
   width: 15px;
   height: 15px;
 }
+
+.react-hot-toast-container,
+[data-hot-toast] {
+  z-index: 99999 !important;
+}
