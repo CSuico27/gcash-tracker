@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   Table,
   TableBody,
@@ -10,6 +10,7 @@ import Badge from "../../ui/badge/Badge";
 import { supabase } from "../../../supabase/SupabaseClient";
 import TransactionActions from "../TransactionActions";
 import Spinner from "../../ui/spinner/Spinner";
+import { useSearch } from "../../../context/SearchContext";
 
 import ReactPaginate from 'react-paginate';
 
@@ -40,34 +41,43 @@ export default function BasicTableOne({ refreshKey }: Props) {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
+  const { searchQuery } = useSearch();
 
-  const fetchTransactions = async (page: number) => {
+  const fetchTransactions = useCallback(async (page: number, search: string = "") => {
     setLoading(true);
     const from = page * PAGE_SIZE;
     const to = from + PAGE_SIZE - 1;
 
-    const { data, error, count } = await supabase
+    let query = supabase
       .from("transactions")
       .select("*", { count: "exact" })
-      .order("created_at", { ascending: false })
-      .range(from, to);
+      .order("created_at", { ascending: false });
+
+    if (search.trim()) {
+      const searchPattern = `%${search.trim()}%`;
+      query = query.or(
+        `reference_no.ilike.${searchPattern},gcash_name.ilike.${searchPattern},mobile_number.ilike.${searchPattern},claimed_by.ilike.${searchPattern}`
+      );
+    }
+
+    const { data, error, count } = await query.range(from, to);
 
     if (!error) {
       setTransactions(data || []);
       setTotalCount(count ?? 0);
     }
     setLoading(false);
-  };
+  }, []);
 
-  // Reset to page 0 when refreshKey changes
+  // When search changes, reset to page 0
   useEffect(() => {
     setCurrentPage(0);
-  }, [refreshKey]);
+  }, [searchQuery]);
 
-  // Fetch whenever page or refreshKey changes
+  // Fetch data whenever page or refreshKey changes
   useEffect(() => {
-    fetchTransactions(currentPage);
-  }, [currentPage, refreshKey]);
+    fetchTransactions(currentPage, searchQuery);
+  }, [currentPage, refreshKey, fetchTransactions, searchQuery]);
 
   const handlePageChange = ({ selected }: { selected: number }) => {
     setCurrentPage(selected);
@@ -90,7 +100,8 @@ export default function BasicTableOne({ refreshKey }: Props) {
   };
 
   return (
-    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
+    <div className="space-y-4">
+      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
       <div className="max-w-full overflow-x-auto">
         <Table>
           {/* Header */}
@@ -206,6 +217,7 @@ export default function BasicTableOne({ refreshKey }: Props) {
           />
         </div>
       )}
+      </div>
     </div>
   );
 }

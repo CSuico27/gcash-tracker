@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router";
 import { useAuth } from "./context/AuthContext"; // adjust path
+import { SearchProvider } from "./context/SearchContext";
 import SignIn from "./pages/AuthPages/SignIn";
 import SignUp from "./pages/AuthPages/SignUp";
 import NotFound from "./pages/OtherPage/NotFound";
@@ -35,9 +36,10 @@ const GuestRoute = ({ children }: { children: React.ReactNode }) => {
 
 export default function App() {
   return (
-    <Router>
-      <ScrollToTop />
-      <Routes>
+    <SearchProvider>
+      <Router>
+        <ScrollToTop />
+        <Routes>
         {/* Default redirect */}
         <Route path="/" element={<ConfirmEmail />} />
 
@@ -65,6 +67,7 @@ export default function App() {
         {/* Fallback */}
         <Route path="*" element={<NotFound />} />
       </Routes>
-    </Router>
+      </Router>
+    </SearchProvider>
   );
 }
